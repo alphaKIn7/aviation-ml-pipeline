@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────
+# Training Configuration
+# ──────────────────────────────────────────────
+# This is the SINGLE SOURCE OF TRUTH for all training parameters.
+# Never hardcode values in Python files — always read from here.
+
+data:
+  raw_path: "data/raw/"
+  processed_path: "data/processed/"
+  test_size: 0.2
+  random_state: 42
+  target_column: "target"
+
+features:
+  numerical: []        # Will be populated during feature engineering
+  categorical: []      # Will be populated during feature engineering
+  drop_columns: []     # Columns to exclude
+
+model:
+  name: "xgboost"      # Options: xgboost, lightgbm, random_forest, logistic
+  hyperparameters:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    random_state: 42
+
+training:
+  cross_validation_folds: 5
+  early_stopping_rounds: 10
+  metric: "accuracy"    # Options: accuracy, f1, roc_auc, rmse, mae
+
+artifacts:
+  model_path: "artifacts/models/"
+  plots_path: "artifacts/plots/"
+  reports_path: "artifacts/reports/"
+
+logging:
+  level: "INFO"
+  log_file: "logs/training.log"

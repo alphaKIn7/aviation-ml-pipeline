@@ -1,0 +1,15 @@
+# ──────────────────────────────────────────────
+# Model Serving / Inference Configuration
+# ──────────────────────────────────────────────
+
+model:
+  path: "artifacts/models/best_model.pkl"
+  version: "1.0.0"
+
+server:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 2
+
+preprocessing:
+  pipeline_path: "artifacts/models/preprocessing_pipeline.pkl"

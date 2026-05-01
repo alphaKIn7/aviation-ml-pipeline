@@ -1,0 +1,50 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ===== Virtual Environments =====
+.venv/
+venv/
+env/
+
+# ===== Data (never commit raw data) =====
+data/raw/*
+data/interim/*
+data/processed/*
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+
+# ===== Artifacts (models, reports — too large for git) =====
+artifacts/models/*
+artifacts/plots/*
+artifacts/reports/*
+!artifacts/models/.gitkeep
+!artifacts/plots/.gitkeep
+!artifacts/reports/.gitkeep
+
+# ===== IDE =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Environment variables =====
+.env
+*.env
+
+# ===== Logs =====
+logs/
+*.log
