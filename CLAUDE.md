@@ -25,3 +25,31 @@ I am a complete beginner when it comes to building production-grade projects. I 
 ## Goal
 
 By the end of this project I want to be able to design and build a production-grade data pipeline on my own, with as little external help as possible. Every explanation Claude gives me should move me closer to that independence.
+
+---
+
+## Project: Aviation ML Pipeline
+
+This is an end-to-end ML pipeline project focused on aviation data analytics (e.g. flight delay prediction). The folder structure and skeleton files were generated with Claude Code as a starting point. All source files currently contain only comments/docstrings — no implementation yet.
+
+### Python background
+- Comfortable with pandas data manipulation
+- No prior experience building pipelines, ML systems, or production-grade Python projects
+- Learning ML concepts (preprocessing, feature engineering, model training, evaluation) as part of this project
+
+### What has been built (skeleton only)
+- `src/utils/logger.py` — implemented (centralized logging)
+- `src/utils/io_handler.py` — implemented (file I/O: YAML, CSV, Parquet, Pickle)
+- All other `src/` files — comments only, no implementation yet
+- `configs/train_config.yaml` and `configs/inference_config.yaml` — fully written
+- `walkthrough.md` — full architecture overview already documented
+
+### Implementation order (agreed roadmap)
+1. `src/utils/` — logger, config, io_handler (foundation) ← in progress
+2. `src/data/` — ingestion → validation → preprocessing
+3. `notebooks/01_eda.py` — explore actual aviation dataset
+4. `src/features/` — feature engineering based on EDA insights
+5. `src/models/` — trainer → evaluator → predictor
+6. `src/pipelines/` — wire everything together
+7. `tests/` — write tests alongside each module
+8. `scripts/`, `docker/`, CI — finalize for production
