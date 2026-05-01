@@ -20,3 +20,47 @@
 #   Centralizing I/O prevents scattered file handling bugs and makes
 #   it easy to switch formats (e.g., CSV → Parquet) project-wide.
 # ──────────────────────────────────────────────
+
+
+import pandas as pd
+import yaml
+import pickle
+from pathlib import Path
+
+def load_yaml(path: str) -> dict:
+    with open(path, "r") as f:
+        return yaml.safe_load(f)
+    
+
+def save_yaml(data: dict, path: str) -> None:
+    with open(path, "w") as f:
+        yaml.dump(data, f)
+    
+def save_dataframe(df: pd.DataFrame, path: str, fmt: str = "csv") -> None:
+    if fmt == "csv":
+        df.to_csv(path, index=False)
+    elif fmt == "parquet":
+        df.to_parquet(path, index=False)
+    else:
+        raise ValueError("Invalid format. Choose 'csv' or 'parquet'.")
+
+def load_dataframe(path: str) -> pd.DataFrame:
+    if path.endswith(".csv"):
+        return pd.read_csv(path)
+    elif path.endswith(".parquet"):
+        return pd.read_parquet(path)
+    else:
+        raise ValueError("Invalid format. Choose 'csv' or 'parquet'.")
+
+
+def ensure_dir(path: str) -> None:
+    Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def load_pickle(path: str) -> object:
+    with open(path, "rb") as f:
+        return pickle.load(f)
+    
+def save_pickle(obj: object, path: str) -> None:
+    with open(path, "wb") as f:
+        pickle.dump(obj, f)

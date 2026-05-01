@@ -26,3 +26,28 @@
 #   add structured logging (JSON format) for log aggregation tools
 #   like ELK Stack or Datadog.
 # ──────────────────────────────────────────────
+
+import logging
+from pathlib import Path
+
+def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
+    logger = logging.getLogger(name)
+    if logger.handlers:
+        return logger
+
+    log_dir = Path(__file__).resolve().parents[2] / "logs"
+    log_dir.mkdir(exist_ok=True)
+
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+    file_handler = logging.FileHandler(log_dir / "pipeline.log")
+    file_handler.setFormatter(formatter)
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(formatter)
+
+    logger.setLevel(level)
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    logger.propagate = False
+    return logger

@@ -27,3 +27,14 @@
 #   docker build -f docker/Dockerfile -t aviation-ml-pipeline .
 #   docker run aviation-ml-pipeline
 # ──────────────────────────────────────────────
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["python", "scripts/train.py", "--config", "configs/train_config.yaml"]
