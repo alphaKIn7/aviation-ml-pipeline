@@ -15,6 +15,7 @@ features:
   numerical: []        # Will be populated during feature engineering
   categorical: []      # Will be populated during feature engineering
   drop_columns: []     # Columns to exclude
+  drop_first: false    # Set to true for linear models, false for tree-based models (xgboost, random_forest)
 
 model:
   name: "xgboost"      # Options: xgboost, lightgbm, random_forest, logistic
