@@ -3,19 +3,97 @@
 # ──────────────────────────────────────────────
 # This is the SINGLE SOURCE OF TRUTH for all training parameters.
 # Never hardcode values in Python files — always read from here.
+#
+# PREDICTION TIME ASSUMPTION:
+#   We are predicting BEFORE the flight departs — at booking or check-in time.
+#   Only scheduled information and historical averages are available.
+#   Any column recording what ACTUALLY happened is data leakage and must be dropped.
 
 data:
-  raw_path: "data/raw/"
+  raw_path: "data/raw/flight_data_2024.csv"
   processed_path: "data/processed/"
   test_size: 0.2
   random_state: 42
-  target_column: "target"
+  target_column: "is_delayed"
 
 features:
-  numerical: []        # Will be populated during feature engineering
-  categorical: []      # Will be populated during feature engineering
-  drop_columns: []     # Columns to exclude
-  drop_first: false    # Set to true for linear models, false for tree-based models (xgboost, random_forest)
+  numerical:
+    - "dep_hour"              # extracted from crs_dep_time (scheduled)
+    - "arr_hour"              # extracted from crs_arr_time (scheduled)
+    - "distance"              # known at booking time
+    - "day_of_week"           # known at booking time
+    - "month"                 # known at booking time
+    - "crs_elapsed_time"      # scheduled flight duration — known at booking time
+    - "carrier_avg_delay"     # historical average delay for this airline
+    - "origin_avg_delay"      # historical average delay at this origin airport
+    - "route_avg_delay"       # historical average delay for this route
+
+  categorical:
+    - "op_unique_carrier"     # airline — known at booking time
+    - "origin"                # origin airport — known at booking time
+    - "dest"                  # destination airport — known at booking time
+    - "dep_hour_bin"          # morning / afternoon / evening / night
+    - "is_ops_peak"           # 1 if departure hour has above-average flight volume
+    - "is_delay_peak"         # 1 if departure hour has historically high delay rate
+    - "is_weekend"            # 1 if Saturday or Sunday
+    - "is_holiday_month"      # 1 if Jan/May/Jun/Jul/Aug/Dec
+
+  # Columns to drop — leakage (actual values) or redundant/useless
+  drop_columns:
+    # --- Data leakage: only known after the flight ---
+    - "dep_delay"             # actual departure delay — not known before departure
+    - "dep_time"              # actual departure time
+    - "arr_delay"             # source of target variable — not a feature
+    - "arr_time"              # actual arrival time
+    - "taxi_out"              # actual taxi-out time
+    - "taxi_in"               # actual taxi-in time
+    - "wheels_off"            # actual wheels-off time
+    - "wheels_on"             # actual wheels-on time
+    - "air_time"              # actual air time
+    - "actual_elapsed_time"   # actual total flight time
+    - "carrier_delay"         # post-flight explanation — severe leakage
+    - "weather_delay"         # post-flight explanation — severe leakage
+    - "nas_delay"             # post-flight explanation — severe leakage
+    - "security_delay"        # post-flight explanation — severe leakage
+    - "late_aircraft_delay"   # post-flight explanation — severe leakage
+    # --- Useless or redundant ---
+    - "year"                  # constant (2024)
+    - "op_carrier_fl_num"     # flight number, random ID
+    - "cancelled"             # filtered out before training
+    - "cancellation_code"     # 99% null
+    - "diverted"              # near-constant
+    - "fl_date"               # covered by month + day_of_week
+    - "origin_city_name"      # redundant with origin airport code
+    - "dest_city_name"        # redundant with dest airport code
+    - "origin_state_nm"       # too coarse
+    - "dest_state_nm"         # too coarse
+
+  drop_first: false           # false for XGBoost; set true for logistic regression
+
+  # Outlier removal — only on columns kept as features
+  outlier_columns:
+    - "crs_elapsed_time"
+    - "distance"
+
+  # Scaling — only needed for linear models, XGBoost ignores this
+  scaling:
+    dep_hour: "minmax"
+    arr_hour: "minmax"
+    distance: "standard"
+    crs_elapsed_time: "standard"
+    carrier_avg_delay: "standard"
+    origin_avg_delay: "standard"
+    route_avg_delay: "standard"
+
+  # Null handling per column
+  null_strategies:
+    crs_elapsed_time: "median"
+    distance: "mean"
+
+  # Null validation thresholds
+  null_thresholds:
+    crs_elapsed_time: 0.01
+    distance: 0.01
 
 model:
   name: "xgboost"      # Options: xgboost, lightgbm, random_forest, logistic

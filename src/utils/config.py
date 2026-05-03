@@ -6,6 +6,7 @@ logger = get_logger(__name__)
 
 REQUIRED_KEYS = {
     "data":     ["raw_path", "processed_path", "target_column"],
+    "features": ["numerical", "categorical", "drop_columns"],
     "model":    ["name", "hyperparameters"],
     "training": ["cross_validation_folds", "metric"],
     "artifacts":["model_path"],
