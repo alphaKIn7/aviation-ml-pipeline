@@ -28,11 +28,18 @@ features:
     - "origin_avg_delay"      # historical average delay at this origin airport
     - "route_avg_delay"       # historical average delay for this route
 
+  # String categoricals — go through pd.get_dummies (one-hot encoding)
   categorical:
-    - "op_unique_carrier"     # airline — known at booking time
-    - "origin"                # origin airport — known at booking time
-    - "dest"                  # destination airport — known at booking time
+    - "op_unique_carrier"     # airline code
+    - "origin"                # origin airport code
+    - "dest"                  # destination airport code
+    - "route"                 # origin + "_" + dest (e.g. "JFK_LAX")
     - "dep_hour_bin"          # morning / afternoon / evening / night
+
+  # Already 0/1 columns — converted to int directly, NOT one-hot encoded.
+  # Passing these through get_dummies creates two redundant columns (col_True
+  # and col_False) that waste feature slots and confuse feature selection.
+  binary:
     - "is_ops_peak"           # 1 if departure hour has above-average flight volume
     - "is_delay_peak"         # 1 if departure hour has historically high delay rate
     - "is_weekend"            # 1 if Saturday or Sunday
@@ -96,17 +103,22 @@ features:
     distance: 0.01
 
 model:
-  name: "xgboost"      # Options: xgboost, lightgbm, random_forest, logistic
+  name: "xgboost"
   hyperparameters:
-    n_estimators: 100
-    max_depth: 6
-    learning_rate: 0.1
-    random_state: 42
+    n_estimators: 300         # more trees = better generalisation
+    max_depth: 5              # slightly shallower reduces overfitting
+    learning_rate: 0.05       # slower learning + more trees = more precise
+    subsample: 0.8            # each tree sees 80% of rows (reduces overfitting)
+    colsample_bytree: 0.8     # each tree sees 80% of features per split
+    scale_pos_weight: 4       # penalise missing a delay 4x more than a false alarm
+    tree_method: "hist"       # histogram algorithm — required for native categorical,
+    random_state: 42          # dramatically faster on large datasets (like LightGBM)
 
 training:
   cross_validation_folds: 5
   early_stopping_rounds: 10
-  metric: "accuracy"    # Options: accuracy, f1, roc_auc, rmse, mae
+  metric: "roc_auc"           # optimise for ranking quality, not raw accuracy
+  prediction_threshold: 0.35  # predict "delayed" when P(delay) >= 0.35
 
 artifacts:
   model_path: "artifacts/models/"
